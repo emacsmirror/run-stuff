@@ -64,3 +64,9 @@ Examples::
       $(find ~/gPodder/Downloads -type f -printf "%T+\t%p\n" \
       -name "*.mp*" -o -name "*.og*" -o -name "*.ac3" | \
       sort -r | head -n 10 | cut -f2 -d$'\t' | xargs -d '\n' printf " %q ") & disown
+
+
+If you'd like to change the default terminal from xterm, it can be configured as follows::
+
+   (setq run-stuff-terminal-command "gnome-terminal")
+   (setq run-stuff-terminal-execute-flag "--command")
