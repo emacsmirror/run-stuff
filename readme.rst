@@ -69,4 +69,4 @@ Examples::
 If you'd like to change the default terminal from xterm, it can be configured as follows::
 
    (setq run-stuff-terminal-command "gnome-terminal")
-   (setq run-stuff-terminal-execute-flag "--command")
+   (setq run-stuff-terminal-execute-arg "--command")

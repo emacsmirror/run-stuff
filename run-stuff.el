@@ -3,8 +3,11 @@
 ;; Copyright (C) 2017  Campbell Barton
 
 ;; Author: Campbell Barton <ideasman42@gmail.com>
-;; Keywords: lisp
+
+;; URL: https://github.com/ideasman42/emacs-run-stuff
 ;; Version: 0.0.1
+;; Keywords: files lisp files convenience hypermedia
+;; Package-Requires: ((emacs "24.4"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -40,7 +43,7 @@
 ;; Note that there is support for line splitting,
 ;; so long commands may be split over multiple lines.
 ;; This is done using the '\' character, when executing the current line
-;; all following lines which end with '\' will be included.
+;; all surrounding lines which end with '\' will be included.
 ;;
 ;; So you can for define a shell command as follows:
 ;;
@@ -62,15 +65,13 @@
 
 (defcustom run-stuff-terminal-command
   "xterm"
-  "Used to run commands in a terminal,
-the following text is to be executed."
+  "Used to run commands in a terminal, the following text is to be executed."
   :group 'run-stuff
   :safe #'stringp)
 
-(defcustom run-stuff-terminal-execute-flag
+(defcustom run-stuff-terminal-execute-arg
   "-e"
-  "Used to run commands in a terminal,
-the following text is to be executed."
+  "Passed to the terminal to execute a command."
   :group 'run-stuff
   :safe #'stringp)
 
@@ -80,7 +81,7 @@ the following text is to be executed."
 (defun run-stuff--extract-split-lines (line-terminate-char)
   "Extract line(s) at point.
 Multiple lines (below the current) are extracted
-if they end with a backslash character.
+if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (interactive)
   (save-excursion
@@ -106,8 +107,8 @@ Returns the line(s) as a string with no properties."
       (buffer-substring-no-properties start end))))
 
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
-  "A version of run-stuff--extract-split-lines-joined which
-detects lines above the current one"
+  "Wrapper for run-stuff--extract-split-lines that detects previous lines.
+Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (interactive)
   (save-excursion
     (let* ((prev (line-beginning-position))
@@ -131,8 +132,8 @@ detects lines above the current one"
 
 
 (defun run-stuff--extract-split-lines-search-up-joined (line-terminate-char)
-  "A version of run-stuff--extract-split-lines which
-joins lines and removes the line-terminate-char"
+  "Wrapper for run-stuff--extract-split-lines-search-up that joins the string.
+Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((line-terminate-str (char-to-string line-terminate-char)))
     (mapconcat
      (function
@@ -157,7 +158,7 @@ joins lines and removes the line-terminate-char"
      ((string-prefix-p "$ " command)
       (call-process
        run-stuff-terminal-command nil 0 nil
-       run-stuff-terminal-execute-flag
+       run-stuff-terminal-execute-arg
        (string-trim-left (string-remove-prefix "$ " command))))
      ;; Open the file with the default mime type.
      ((string-prefix-p "~ " command)
