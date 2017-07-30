@@ -12,7 +12,8 @@ Motivation
 Not every command makes sense to alias or wrap in a shell script,
 sometimes there are tasks you run every so often or paths you might want to go back to later on.
 
-This makes it easy to have add-hoc files where day-to-day tasks/files are stored for quick access
+This makes it possible to use a file *(org-mode or just a text file)*
+as a convenient ad-hoc reference for miscellaneous commands and files
 *(a step up from hoping that handy command remains in you're shells search history)*.
 
 
