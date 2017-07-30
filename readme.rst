@@ -34,6 +34,7 @@ While you don't have to use/know all of the following prefixes,
 these can be used to control how execution is performed.
 
 - ``$`` Run in terminal.
+- ``@`` Open in an Emacs buffer.
 - ``~`` Open with default mime type (works for paths too).
 - ``http://`` or ``https://`` opens in a web-browser.
 - Directories are opened in the terminal.
@@ -54,6 +55,9 @@ Examples::
 
   # Opens a web site
   http://wiki.blender.org
+
+  # Edit your emacs config
+  @ ~/.emacs.d/init.el
 
   # Play a movie from where you left off
   mpv '/path/to/movie.mp4' --no-terminal \

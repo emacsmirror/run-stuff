@@ -34,6 +34,7 @@
 ;; A command to execute the current selection or the current line.
 ;; 
 ;; - '$ ' Run in terminal.
+;; - '@ ' Open in an Emacs buffer.
 ;; - '~ ' Open with default mime type (works for paths too).
 ;; - 'http://' or 'https://' opens in a web-browser.
 ;; - Open in terminal if its a directory.
@@ -160,6 +161,10 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
        run-stuff-terminal-command nil 0 nil
        run-stuff-terminal-execute-arg
        (string-trim-left (string-remove-prefix "$ " command))))
+     ((string-prefix-p "@ " command)
+      (switch-to-buffer (find-file-noselect
+       (expand-file-name
+        (string-trim-left (string-remove-prefix "@ " command))))))
      ;; Open the file with the default mime type.
      ((string-prefix-p "~ " command)
       (call-process
