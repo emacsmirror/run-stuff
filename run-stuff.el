@@ -182,7 +182,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
         (call-process run-stuff-terminal-command nil 0 nil)))
      ;; Default, run directly without a terminal.
      (t
-      (shell-command command)))))
+      (call-process-shell-command command nil 0)))))
 
 (provide 'run-stuff)
 ;;; run-stuff.el ends here
