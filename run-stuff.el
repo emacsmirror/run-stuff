@@ -1,4 +1,4 @@
-;;; run-stuff.el --- a simple package                     -*- lexical-binding: t; -*-
+;;; run-stuff.el --- context based command execution -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017  Campbell Barton
 
