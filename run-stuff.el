@@ -175,7 +175,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
      ((or
        (string-prefix-p "http://" command)
        (string-prefix-p "https://" command))
-      (call-process run-stuff-open-command nil 0 nil command))
+      (browse-url command))
      ;; Open terminal at path.
      ((file-directory-p command)
       ;; Expand since it may be relative to the current file.
