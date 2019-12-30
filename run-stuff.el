@@ -32,7 +32,7 @@
 ;; (run-stuff-command-on-region-or-line)
 ;;
 ;; A command to execute the current selection or the current line.
-;; 
+;;
 ;; - '$ ' Run in terminal.
 ;; - '@ ' Open in an Emacs buffer.
 ;; - '~ ' Open with default mime type (works for paths too).
@@ -58,20 +58,17 @@
 
 ;;; Code:
 
-(defcustom run-stuff-open-command
-  "xdg-open"
+(defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
   :group 'run-stuff
   :safe #'stringp)
 
-(defcustom run-stuff-terminal-command
-  "xterm"
+(defcustom run-stuff-terminal-command "xterm"
   "Used to run commands in a terminal, the following text is to be executed."
   :group 'run-stuff
   :safe #'stringp)
 
-(defcustom run-stuff-terminal-execute-arg
-  "-e"
+(defcustom run-stuff-terminal-execute-arg "-e"
   "Passed to the terminal to execute a command."
   :group 'run-stuff
   :safe #'stringp)
@@ -86,26 +83,29 @@ if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (interactive)
   (save-excursion
-    (let* ((start (line-beginning-position))
-           (end start)
-           (iterate t)
-           (new-end))
+    (let*
+      (
+        (start (line-beginning-position))
+        (end start)
+        (iterate t)
+        (new-end))
       (while iterate
         (setq new-end (line-end-position))
         ;; could be more efficient?
         (setq new-end-ws
-              (save-excursion
-                (end-of-line)
-                (skip-syntax-backward "-") (point)))
+          (save-excursion
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (point)))
         (if (> new-end end)
-            (progn
-              (setq end new-end)
-              (setq end-ws new-end-ws)
-              (let ((end-ws-before (char-before end-ws)))
-                (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
-                    (forward-line)
-                    (setq iterate nil))))
-            (setq iterate nil)))
+          (progn
+            (setq end new-end)
+            (setq end-ws new-end-ws)
+            (let ((end-ws-before (char-before end-ws)))
+              (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
+                (forward-line)
+                (setq iterate nil))))
+          (setq iterate nil)))
       (buffer-substring-no-properties start end))))
 
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
@@ -113,24 +113,27 @@ Returns the line(s) as a string with no properties."
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (interactive)
   (save-excursion
-    (let* ((prev (line-beginning-position))
-           (iterate t))
+    (let*
+      (
+        (prev (line-beginning-position))
+        (iterate t))
       (while iterate
         ;; could be more efficient?
         (setq above-new-end-ws
-              (save-excursion
-                (forward-line -1)
-                (end-of-line)
-                (skip-syntax-backward "-") (point)))
+          (save-excursion
+            (forward-line -1)
+            (end-of-line)
+            (skip-syntax-backward "-")
+            (point)))
         (if (< above-new-end-ws prev)
-            (progn
-              (setq prev above-new-end-ws)
-              (setq end-ws above-new-end-ws)
-              (let ((end-ws-before (char-before end-ws)))
-                (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
-                    (forward-line -1)
-                    (setq iterate nil))))
-            (setq iterate nil)))
+          (progn
+            (setq prev above-new-end-ws)
+            (setq end-ws above-new-end-ws)
+            (let ((end-ws-before (char-before end-ws)))
+              (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
+                (forward-line -1)
+                (setq iterate nil))))
+          (setq iterate nil)))
       (run-stuff--extract-split-lines line-terminate-char))))
 
 
@@ -139,54 +142,57 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((line-terminate-str (char-to-string line-terminate-char)))
     (mapconcat
-     (function
-      (lambda (s)
-        (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
-     (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n") " ")))
-
+      (function
+        (lambda (s) (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
+      (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n") " ")))
 
 
 ;;;###autoload
 (defun run-stuff-command-on-region-or-line ()
   "Run selected text in a terminal or use the current line."
   (interactive)
-  (let ((command
-         (if (use-region-p)
-             (buffer-substring (region-beginning) (region-end)) ;; current selection
-             ;; (thing-at-point 'line t) ;; current line
-             ;; a version that can extract multiple lines!
-             (run-stuff--extract-split-lines-search-up-joined ?\\))))
+  (let
+    (
+      (command
+        (if (use-region-p)
+          (buffer-substring (region-beginning) (region-end)) ;; current selection
+          ;; (thing-at-point 'line t) ;; current line
+          ;; a version that can extract multiple lines!
+          (run-stuff--extract-split-lines-search-up-joined ?\\))))
     (cond
-     ;; Run as command in terminal.
-     ((string-prefix-p "$ " command)
-      (call-process
-       run-stuff-terminal-command nil 0 nil
-       run-stuff-terminal-execute-arg
-       (string-trim-left (string-remove-prefix "$ " command))))
-     ((string-prefix-p "@ " command)
-      (switch-to-buffer
-       (find-file-noselect
-        (expand-file-name
-         (string-trim-left (string-remove-prefix "@ " command))))))
-     ;; Open the file with the default mime type.
-     ((string-prefix-p "~ " command)
-      (call-process
-       run-stuff-open-command nil 0 nil
-       (string-trim-left (string-remove-prefix "~ " command))))
-     ;; Open the URL (web browser)
-     ((or
-       (string-prefix-p "http://" command)
-       (string-prefix-p "https://" command))
-      ;; Would use 'browse-url', but emacs doesn't disown the process.
-      (call-process run-stuff-open-command nil 0 nil command))
-     ;; Open terminal at path.
-     ((file-directory-p command)
-      ;; Expand since it may be relative to the current file.
-      (let ((default-directory (expand-file-name command)))
-        (call-process run-stuff-terminal-command nil 0 nil)))
-     ;; Default, run directly without a terminal.
-     (t
-      (call-process-shell-command command nil 0)))))
+      ;; Run as command in terminal.
+      ((string-prefix-p "$ " command)
+        (call-process
+          run-stuff-terminal-command
+          nil
+          0
+          nil
+          run-stuff-terminal-execute-arg
+          (string-trim-left (string-remove-prefix "$ " command))))
+      ((string-prefix-p "@ " command)
+        (switch-to-buffer
+          (find-file-noselect
+            (expand-file-name (string-trim-left (string-remove-prefix "@ " command))))))
+      ;; Open the file with the default mime type.
+      ((string-prefix-p "~ " command)
+        (call-process
+          run-stuff-open-command
+          nil
+          0
+          nil
+          (string-trim-left (string-remove-prefix "~ " command))))
+      ;; Open the URL (web browser)
+      ((or (string-prefix-p "http://" command) (string-prefix-p "https://" command))
+        ;; Would use 'browse-url', but emacs doesn't disown the process.
+        (call-process run-stuff-open-command nil 0 nil command))
+      ;; Open terminal at path.
+      ((file-directory-p command)
+        ;; Expand since it may be relative to the current file.
+        (let ((default-directory (expand-file-name command)))
+          (call-process run-stuff-terminal-command nil 0 nil)))
+      ;; Default, run directly without a terminal.
+      (t
+        (call-process-shell-command command nil 0)))))
 
 (provide 'run-stuff)
 ;;; run-stuff.el ends here
