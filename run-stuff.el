@@ -86,14 +86,16 @@ if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (interactive)
   (save-excursion
-    (let*
+    (let
       (
         (start (line-beginning-position))
-        (end start)
         (iterate t)
+        ;; Use later.
+        (end nil)
         (new-end nil)
         (new-end-ws nil)
         (end-ws nil))
+      (setq end start)
       (while iterate
         (setq new-end (line-end-position))
         ;; could be more efficient?
@@ -118,10 +120,11 @@ Returns the line(s) as a string with no properties."
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (interactive)
   (save-excursion
-    (let*
+    (let
       (
         (prev (line-beginning-position))
         (iterate t)
+        ;; Use later.
         (end-ws nil)
         (above-new-end-ws nil))
       (while iterate
