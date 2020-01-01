@@ -61,17 +61,20 @@
 (defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
   :group 'run-stuff
-  :safe #'stringp)
+  :safe #'stringp
+  :type 'string)
 
 (defcustom run-stuff-terminal-command "xterm"
   "Used to run commands in a terminal, the following text is to be executed."
   :group 'run-stuff
-  :safe #'stringp)
+  :safe #'stringp
+  :type 'string)
 
 (defcustom run-stuff-terminal-execute-arg "-e"
   "Passed to the terminal to execute a command."
   :group 'run-stuff
-  :safe #'stringp)
+  :safe #'stringp
+  :type 'string)
 
 
 (require 'subr-x)
@@ -88,7 +91,9 @@ Returns the line(s) as a string with no properties."
         (start (line-beginning-position))
         (end start)
         (iterate t)
-        (new-end))
+        (new-end nil)
+        (new-end-ws nil)
+        (end-ws nil))
       (while iterate
         (setq new-end (line-end-position))
         ;; could be more efficient?
@@ -116,7 +121,9 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
     (let*
       (
         (prev (line-beginning-position))
-        (iterate t))
+        (iterate t)
+        (end-ws nil)
+        (above-new-end-ws nil))
       (while iterate
         ;; could be more efficient?
         (setq above-new-end-ws
