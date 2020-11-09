@@ -168,7 +168,13 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
           (buffer-substring (region-beginning) (region-end)) ;; current selection
           ;; (thing-at-point 'line t) ;; current line
           ;; a version that can extract multiple lines!
-          (run-stuff--extract-split-lines-search-up-joined ?\\))))
+          (run-stuff--extract-split-lines-search-up-joined ?\\)))
+      ;; Run from the current buffers directory.
+      (default-directory
+        (if (buffer-file-name)
+          (file-name-directory (buffer-file-name))
+          ;; Use existing value as fallback.
+          default-directory)))
     (cond
       ;; Run as command in terminal.
       ((string-prefix-p "$ " command)
