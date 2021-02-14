@@ -1,9 +1,10 @@
-
-***********************
+#######################
 Run-Stuff Emacs Package
-***********************
+#######################
 
 A package for convenient, execute command-line actions from Emacs.
+
+Available via `melpa <https://melpa.org/#/run-stuff>`__.
 
 
 Motivation
