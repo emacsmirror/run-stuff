@@ -2,7 +2,7 @@
 Run-Stuff Emacs Package
 #######################
 
-A package for convenient, execute command-line actions from Emacs.
+A package to conveniently execute command-line actions from Emacs.
 
 Available via `melpa <https://melpa.org/#/run-stuff>`__.
 
@@ -49,23 +49,23 @@ the cursor may be anywhere within the text, the upper and lower lines will be de
 
 Examples::
 
-  # A quick test to see everything works
+  # A quick test to see everything works.
   $ find /
 
-  # Opens a text file
+  # Opens a text file.
   ~ /path/to/my/project.txt
 
-  # Opens a web site
+  # Opens a web site.
   http://wiki.blender.org
 
-  # Edit your emacs config
-  @ ~/.emacs.d/init.el
+  # Edit your Emacs config.
+  @ ~/.config/emacs/init.el
 
-  # Play a movie from where you left off
+  # Play a movie from where you left off.
   mpv '/path/to/movie.mp4' --no-terminal \
   --start=+0:30:00
 
-  # Play the 10 latest podcasts
+  # Play the 10 latest podcasts.
   $ eval audacious \
       $(find ~/gPodder/Downloads -type f -printf "%T+\t%p\n" \
       -name "*.mp*" -o -name "*.og*" -o -name "*.ac3" | \
@@ -76,3 +76,28 @@ If you'd like to change the default terminal from xterm, it can be configured as
 
    (setq run-stuff-terminal-command "gnome-terminal")
    (setq run-stuff-terminal-execute-arg "--command")
+
+
+Customization
+-------------
+
+``run-stuff-open-command`` (``xdg-open``)
+   The command used to open with the default mime type.
+``run-stuff-terminal-command`` (``xterm``)
+   The command to use when opening a terminal.
+``run-stuff-terminal-execute-arg`` (``-e``)
+   The terminal argument to use for running a command.
+``run-stuff-handlers``
+   Used to customize pattern matching and to add your own handlers.
+
+   This contains a list of callbacks that execute in-order to handle running something in the current context.
+
+   First (extract function)
+     Return a string from the current context (typically the current line).
+   Second (handle function)
+     Take the result of the extract function and run the function if it matches or return nil.
+
+   The handlers are handled in order, first to last.
+   On success, no other handlers are tested.
+
+   This can be made a buffer local variable to customize this for each mode.

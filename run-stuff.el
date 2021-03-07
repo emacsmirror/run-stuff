@@ -1,13 +1,13 @@
-;;; run-stuff.el --- context based command execution -*- lexical-binding: t; -*-
+;;; run-stuff.el --- Context based command execution -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017  Campbell Barton
 
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://gitlab.com/ideasman42/emacs-run-stuff
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Keywords: files lisp files convenience hypermedia
-;; Package-Requires: ((emacs "24.4"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,7 +31,8 @@
 
 ;; (run-stuff-command-on-region-or-line)
 ;;
-;; A command to execute the current selection or the current line.
+;; A command to execute the current selection or the current line
+;; using the default `run-stuff-handlers' variable.
 ;;
 ;; - '$ ' Run in terminal.
 ;; - '@ ' Open in an Emacs buffer.
@@ -58,6 +59,9 @@
 
 ;;; Code:
 
+;; ---------------------------------------------------------------------------
+;; Custom Variables
+
 (defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
   :group 'run-stuff
@@ -76,8 +80,63 @@
   :safe #'stringp
   :type 'string)
 
+(defcustom run-stuff-handlers
+  (list
+    (list ;; Open the file in Emacs: "@ " prefix.
+      'run-stuff-extract-multi-line
+      #'
+      (lambda (command)
+        (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
+          (when command-test
+            (run-stuff-handle-file-open-in-buffer command-test)))))
+    (list ;; Open the file with the default mime type: "~ " prefix.
+      'run-stuff-extract-multi-line
+      #'
+      (lambda (command)
+        (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
+          (when command-test
+            (run-stuff-handle-file-default-mime command-test)))))
 
-(require 'subr-x)
+    (list ;; Open in a shell: "$ " prefix.
+      'run-stuff-extract-multi-line
+      #'
+      (lambda (command)
+        (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
+          (when command-test
+            (run-stuff-handle-shell command-test)))))
+    (list ;; Open the URL (web browser).
+      'run-stuff-extract-multi-line
+      #'
+      (lambda (command)
+        (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
+          (when command-test
+            (run-stuff-handle-url command-test)))))
+    (list ;; Open the terminal at a directory.
+      'run-stuff-extract-multi-line
+      #'
+      (lambda (command)
+        (let ((command-test (and (file-directory-p command) command)))
+          (when command-test
+            (run-stuff-handle-directory-in-terminal command-test))))))
+
+  "A list of lists, each defining a handler.
+
+First (extract function)
+  Return a string from the current context (typically the current line).
+Second (handle function)
+  Take the result of the extract function and run the function
+  if it matches or return nil.
+
+The handlers are handled in order, first to last.
+On success, no other handlers are tested.
+
+This can be made a buffer local variable to customize this for each mode."
+  :group 'run-stuff
+  :type 'list)
+
+
+;; ---------------------------------------------------------------------------
+;; Internal Functions/Macros
 
 (defun run-stuff--extract-split-lines (line-terminate-char)
   "Extract line(s) at point.
@@ -157,58 +216,111 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
       (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n") " ")))
 
 
+;; ---------------------------------------------------------------------------
+;; Public Utilities
+
+;;;###autoload
+(defmacro run-stuff-with-buffer-default-directory (&rest body)
+  "Use the buffer directory as the default directory, executing BODY."
+  (declare (indent 1))
+  `
+  (let
+    (
+      (default-directory
+        (let ((filename (buffer-file-name)))
+          (if filename
+            (file-name-directory filename)
+            default-directory))))
+    ,@body))
+
+
+;; ---------------------------------------------------------------------------
+;; Extractor Functions
+
+(defun run-stuff-extract-multi-line ()
+  "Extract lines from the current buffer, optionally multiple wrapped lines."
+  (if (use-region-p)
+    (buffer-substring (region-beginning) (region-end)) ;; current selection
+    ;; (thing-at-point 'line t) ;; current line
+    ;; a version that can extract multiple lines!
+    (run-stuff--extract-split-lines-search-up-joined ?\\)))
+
+
+;; ---------------------------------------------------------------------------
+;; Test Functions
+
+(defun run-stuff-test-prefix-strip (command prefix-regex)
+  "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
+  (save-match-data
+    (cond
+      ((string-match prefix-regex command)
+        (substring command (match-end 0)))
+      (t
+        nil))))
+
+(defun run-stuff-test-prefix-match (command prefix-regex)
+  "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
+  (save-match-data
+    (when (string-match prefix-regex command)
+      (match-string-no-properties 0 command))))
+
+
+;; ---------------------------------------------------------------------------
+;; Handler Functions
+
+(defun run-stuff-handle-file-open-in-buffer (command)
+  "Open COMMAND as a buffer."
+  (run-stuff-with-buffer-default-directory
+    (switch-to-buffer (find-file-noselect (expand-file-name command)))
+    t))
+
+(defun run-stuff-handle-file-default-mime (command)
+  "Open COMMAND using the default mime handler."
+  (run-stuff-with-buffer-default-directory
+    (call-process run-stuff-open-command nil 0 nil command)))
+
+(defun run-stuff-handle-shell (command)
+  "Open COMMAND in a terminal."
+  (run-stuff-with-buffer-default-directory
+    (call-process run-stuff-terminal-command nil 0 nil run-stuff-terminal-execute-arg command)
+    t))
+
+(defun run-stuff-handle-url (command)
+  "Open COMMAND as a URL."
+  ;; Would use 'browse-url', but emacs doesn't disown the process.
+  (run-stuff-with-buffer-default-directory
+    (call-process run-stuff-open-command nil 0 nil command)
+    t))
+
+(defun run-stuff-handle-directory-in-terminal (command)
+  "Open COMMAND as a directory in a terminal."
+  ;; Expand since it may be relative to the current file.
+  (let ((default-directory (expand-file-name command)))
+    (call-process run-stuff-terminal-command nil 0 nil)
+    t))
+
+
+;; ---------------------------------------------------------------------------
+;; Public Functions
+
 ;;;###autoload
 (defun run-stuff-command-on-region-or-line ()
   "Run selected text in a terminal or use the current line."
   (interactive)
   (let
-    (
-      (command
-        (if (use-region-p)
-          (buffer-substring (region-beginning) (region-end)) ;; current selection
-          ;; (thing-at-point 'line t) ;; current line
-          ;; a version that can extract multiple lines!
-          (run-stuff--extract-split-lines-search-up-joined ?\\)))
-      ;; Run from the current buffers directory.
-      (default-directory
-        (if (buffer-file-name)
-          (file-name-directory (buffer-file-name))
-          ;; Use existing value as fallback.
-          default-directory)))
-    (cond
-      ;; Run as command in terminal.
-      ((string-prefix-p "$ " command)
-        (call-process
-          run-stuff-terminal-command
-          nil
-          0
-          nil
-          run-stuff-terminal-execute-arg
-          (string-trim-left (string-remove-prefix "$ " command))))
-      ((string-prefix-p "@ " command)
-        (switch-to-buffer
-          (find-file-noselect
-            (expand-file-name (string-trim-left (string-remove-prefix "@ " command))))))
-      ;; Open the file with the default mime type.
-      ((string-prefix-p "~ " command)
-        (call-process
-          run-stuff-open-command
-          nil
-          0
-          nil
-          (string-trim-left (string-remove-prefix "~ " command))))
-      ;; Open the URL (web browser)
-      ((or (string-prefix-p "http://" command) (string-prefix-p "https://" command))
-        ;; Would use 'browse-url', but emacs doesn't disown the process.
-        (call-process run-stuff-open-command nil 0 nil command))
-      ;; Open terminal at path.
-      ((file-directory-p command)
-        ;; Expand since it may be relative to the current file.
-        (let ((default-directory (expand-file-name command)))
-          (call-process run-stuff-terminal-command nil 0 nil)))
-      ;; Default, run directly without a terminal.
-      (t
-        (call-process-shell-command command nil 0)))))
+    ( ;; Store function results.
+      (extract-fn-cache (list))
+      (handlers run-stuff-handlers))
+    (while handlers
+      (pcase-let ((`(,extract-fn ,handle-fn) (pop handlers)))
+        (let ((command (alist-get extract-fn extract-fn-cache)))
+          (unless command
+            (setq command (funcall extract-fn))
+            (push (cons extract-fn command) extract-fn-cache))
+
+          (when (funcall handle-fn command)
+            ;; Success, finished.
+            (setq handlers nil)))))))
 
 (provide 'run-stuff)
 ;;; run-stuff.el ends here
