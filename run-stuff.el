@@ -117,7 +117,7 @@
       (lambda (command)
         (let ((command-test (and (file-directory-p command) command)))
           (when command-test
-            (run-stuff-handle-directory-in-terminal))))))
+            (run-stuff-handle-directory-in-terminal command-test))))))
 
   "A list of lists, each defining a handler.
 
@@ -276,7 +276,8 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-handle-file-default-mime (command)
   "Open COMMAND using the default mime handler."
-  (run-stuff-with-buffer-default-directory (call-process run-stuff-open-command nil 0 nil command)))
+  (run-stuff-with-buffer-default-directory
+    (call-process run-stuff-open-command nil 0 nil command)))
 
 (defun run-stuff-handle-shell (command)
   "Open COMMAND in a terminal."
