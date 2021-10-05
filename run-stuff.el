@@ -163,15 +163,18 @@ Returns the line(s) as a string with no properties."
             (end-of-line)
             (skip-syntax-backward "-")
             (point)))
-        (if (> new-end end)
-          (progn
+        (cond
+          ((> new-end end)
             (setq end new-end)
             (setq end-ws new-end-ws)
             (let ((end-ws-before (char-before end-ws)))
-              (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
-                (forward-line)
-                (setq iterate nil))))
-          (setq iterate nil)))
+              (cond
+                ((and end-ws-before (char-equal end-ws-before line-terminate-char))
+                  (forward-line))
+                (t
+                  (setq iterate nil)))))
+          (t
+            (setq iterate nil))))
       (buffer-substring-no-properties start end))))
 
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
@@ -194,15 +197,18 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
             (end-of-line)
             (skip-syntax-backward "-")
             (point)))
-        (if (< above-new-end-ws prev)
-          (progn
+        (cond
+          ((< above-new-end-ws prev)
             (setq prev above-new-end-ws)
             (setq end-ws above-new-end-ws)
             (let ((end-ws-before (char-before end-ws)))
-              (if (and end-ws-before (char-equal end-ws-before line-terminate-char))
-                (forward-line -1)
-                (setq iterate nil))))
-          (setq iterate nil)))
+              (cond
+                ((and end-ws-before (char-equal end-ws-before line-terminate-char))
+                  (forward-line -1))
+                (t
+                  (setq iterate nil)))))
+          (t
+            (setq iterate nil))))
       (run-stuff--extract-split-lines line-terminate-char))))
 
 
@@ -228,9 +234,11 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
     (
       (default-directory
         (let ((filename (buffer-file-name)))
-          (if filename
-            (file-name-directory filename)
-            default-directory))))
+          (cond
+            (filename
+              (file-name-directory filename))
+            (t
+              default-directory)))))
     ,@body))
 
 
@@ -239,11 +247,14 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-extract-multi-line ()
   "Extract lines from the current buffer, optionally multiple wrapped lines."
-  (if (use-region-p)
-    (buffer-substring (region-beginning) (region-end)) ;; current selection
-    ;; (thing-at-point 'line t) ;; current line
-    ;; a version that can extract multiple lines!
-    (run-stuff--extract-split-lines-search-up-joined ?\\)))
+  (cond
+    ((use-region-p)
+      ;; Current selection.
+      (buffer-substring (region-beginning) (region-end)))
+    (t
+      ;; (thing-at-point 'line t) ;; current line
+      ;; a version that can extract multiple lines!
+      (run-stuff--extract-split-lines-search-up-joined ?\\))))
 
 
 ;; ---------------------------------------------------------------------------
