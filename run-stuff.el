@@ -62,21 +62,20 @@
 ;; ---------------------------------------------------------------------------
 ;; Custom Variables
 
+(defgroup run-stuff nil "Context based command execution." :group 'tools)
+
 (defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
-  :group 'run-stuff
   :safe #'stringp
   :type 'string)
 
 (defcustom run-stuff-terminal-command "xterm"
   "Used to run commands in a terminal, the following text is to be executed."
-  :group 'run-stuff
   :safe #'stringp
   :type 'string)
 
 (defcustom run-stuff-terminal-execute-arg "-e"
   "Passed to the terminal to execute a command."
-  :group 'run-stuff
   :safe #'stringp
   :type 'string)
 
@@ -131,7 +130,6 @@ The handlers are handled in order, first to last.
 On success, no other handlers are tested.
 
 This can be made a buffer local variable to customize this for each mode."
-  :group 'run-stuff
   :type 'list)
 
 
