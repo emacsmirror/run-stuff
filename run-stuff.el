@@ -5,7 +5,7 @@
 
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
-;; URL: https://gitlab.com/ideasman42/emacs-run-stuff
+;; URL: https://codeberg.org/ideasman42/emacs-run-stuff
 ;; Version: 0.0.2
 ;; Keywords: files lisp files convenience hypermedia
 ;; Package-Requires: ((emacs "25.1"))
