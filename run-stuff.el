@@ -164,7 +164,7 @@ Returns the line(s) as a string with no properties."
       (buffer-substring-no-properties start end))))
 
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
-  "Wrapper for run-stuff--extract-split-lines that detects previous lines.
+  "Wrapper for `run-stuff--extract-split-lines' that detects previous lines.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (interactive)
   (save-excursion
@@ -199,7 +199,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 
 (defun run-stuff--extract-split-lines-search-up-joined (line-terminate-char)
-  "Wrapper for run-stuff--extract-split-lines-search-up that joins the string.
+  "Wrapper for `run-stuff--extract-split-lines-search-up' that joins the string.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((line-terminate-str (char-to-string line-terminate-char)))
     (mapconcat
