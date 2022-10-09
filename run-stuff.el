@@ -6,7 +6,7 @@
 ;; Author: Campbell Barton <ideasman42@gmail.com>
 
 ;; URL: https://codeberg.org/ideasman42/emacs-run-stuff
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Keywords: files lisp files convenience hypermedia
 ;; Package-Requires: ((emacs "25.1"))
 
@@ -104,7 +104,10 @@
       (lambda (command)
         (let ((command-test (and (file-directory-p command) command)))
           (when command-test
-            (run-stuff-handle-directory-in-terminal command-test))))))
+            (run-stuff-handle-directory-in-terminal command-test)))))
+    (list ;; Run the command without any further checks (fall-back).
+      'run-stuff-extract-multi-line
+      #'(lambda (command) (run-stuff-handle-shell-no-terminal command))))
 
   "A list of lists, each defining a handler.
 
@@ -295,6 +298,11 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((default-directory (expand-file-name command)))
     (call-process run-stuff-terminal-command nil 0 nil)
     t))
+
+(defun run-stuff-handle-shell-no-terminal (command)
+  "Open COMMAND without a terminal (fall-back when a prefix match isn't found)."
+  ;; Expand since it may be relative to the current file.
+  (run-stuff-with-buffer-default-directory (call-process-shell-command command nil 0 nil) t))
 
 
 ;; ---------------------------------------------------------------------------
