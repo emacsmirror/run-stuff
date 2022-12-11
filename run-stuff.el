@@ -50,7 +50,9 @@
 ;; ---------------------------------------------------------------------------
 ;; Custom Variables
 
-(defgroup run-stuff nil "Context based command execution." :group 'tools)
+(defgroup run-stuff nil
+  "Context based command execution."
+  :group 'tools)
 
 (defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
@@ -208,7 +210,8 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
     (mapconcat
       (function
         (lambda (s) (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
-      (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n") " ")))
+      (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n")
+      " ")))
 
 
 ;; ---------------------------------------------------------------------------
@@ -217,7 +220,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 ;;;###autoload
 (defmacro run-stuff-with-buffer-default-directory (&rest body)
   "Use the buffer directory as the default directory, executing BODY."
-  (declare (indent 1))
+  (declare (indent 0))
   `
   (let
     (
@@ -302,7 +305,9 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defun run-stuff-handle-shell-no-terminal (command)
   "Open COMMAND without a terminal (fall-back when a prefix match isn't found)."
   ;; Expand since it may be relative to the current file.
-  (run-stuff-with-buffer-default-directory (call-process-shell-command command nil 0 nil) t))
+  (run-stuff-with-buffer-default-directory
+    (call-process-shell-command command nil 0 nil)
+    t))
 
 
 ;; ---------------------------------------------------------------------------
