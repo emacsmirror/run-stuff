@@ -71,45 +71,40 @@
 
 (defcustom run-stuff-handlers
   (list
-    (list ;; Open the file in Emacs: "@ " prefix.
-      'run-stuff-extract-multi-line
-      #'
-      (lambda (command)
+   (list ;; Open the file in Emacs: "@ " prefix.
+    'run-stuff-extract-multi-line
+    #'(lambda (command)
         (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
           (when command-test
             (run-stuff-handle-file-open-in-buffer command-test)))))
-    (list ;; Open the file with the default mime type: "~ " prefix.
-      'run-stuff-extract-multi-line
-      #'
-      (lambda (command)
+   (list ;; Open the file with the default mime type: "~ " prefix.
+    'run-stuff-extract-multi-line
+    #'(lambda (command)
         (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
           (when command-test
             (run-stuff-handle-file-default-mime command-test)))))
 
-    (list ;; Open in a shell: "$ " prefix.
-      'run-stuff-extract-multi-line
-      #'
-      (lambda (command)
+   (list ;; Open in a shell: "$ " prefix.
+    'run-stuff-extract-multi-line
+    #'(lambda (command)
         (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
           (when command-test
             (run-stuff-handle-shell command-test)))))
-    (list ;; Open the URL (web browser).
-      'run-stuff-extract-multi-line
-      #'
-      (lambda (command)
+   (list ;; Open the URL (web browser).
+    'run-stuff-extract-multi-line
+    #'(lambda (command)
         (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
           (when command-test
             (run-stuff-handle-url command-test)))))
-    (list ;; Open the terminal at a directory.
-      'run-stuff-extract-multi-line
-      #'
-      (lambda (command)
+   (list ;; Open the terminal at a directory.
+    'run-stuff-extract-multi-line
+    #'(lambda (command)
         (let ((command-test (and (file-directory-p command) command)))
           (when command-test
             (run-stuff-handle-directory-in-terminal command-test)))))
-    (list ;; Run the command without any further checks (fall-back).
-      'run-stuff-extract-multi-line
-      #'(lambda (command) (run-stuff-handle-shell-no-terminal command))))
+   (list ;; Run the command without any further checks (fall-back).
+    'run-stuff-extract-multi-line
+    #'(lambda (command) (run-stuff-handle-shell-no-terminal command))))
 
   "A list of lists, each defining a handler.
 
@@ -136,36 +131,34 @@ if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (interactive)
   (save-excursion
-    (let
-      (
-        (start (line-beginning-position))
-        (iterate t)
-        ;; Use later.
-        (end nil)
-        (new-end nil)
-        (new-end-ws nil)
-        (end-ws nil))
+    (let ((start (line-beginning-position))
+          (iterate t)
+          ;; Use later.
+          (end nil)
+          (new-end nil)
+          (new-end-ws nil)
+          (end-ws nil))
       (setq end start)
       (while iterate
         (setq new-end (line-end-position))
         ;; could be more efficient?
         (setq new-end-ws
-          (save-excursion
-            (end-of-line)
-            (skip-syntax-backward "-")
-            (point)))
+              (save-excursion
+                (end-of-line)
+                (skip-syntax-backward "-")
+                (point)))
         (cond
-          ((> new-end end)
-            (setq end new-end)
-            (setq end-ws new-end-ws)
-            (let ((end-ws-before (char-before end-ws)))
-              (cond
-                ((and end-ws-before (char-equal end-ws-before line-terminate-char))
-                  (forward-line))
-                (t
-                  (setq iterate nil)))))
-          (t
-            (setq iterate nil))))
+         ((> new-end end)
+          (setq end new-end)
+          (setq end-ws new-end-ws)
+          (let ((end-ws-before (char-before end-ws)))
+            (cond
+             ((and end-ws-before (char-equal end-ws-before line-terminate-char))
+              (forward-line))
+             (t
+              (setq iterate nil)))))
+         (t
+          (setq iterate nil))))
       (buffer-substring-no-properties start end))))
 
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
@@ -173,33 +166,31 @@ Returns the line(s) as a string with no properties."
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (interactive)
   (save-excursion
-    (let
-      (
-        (prev (line-beginning-position))
-        (iterate t)
-        ;; Use later.
-        (end-ws nil)
-        (above-new-end-ws nil))
+    (let ((prev (line-beginning-position))
+          (iterate t)
+          ;; Use later.
+          (end-ws nil)
+          (above-new-end-ws nil))
       (while iterate
         ;; could be more efficient?
         (setq above-new-end-ws
-          (save-excursion
-            (forward-line -1)
-            (end-of-line)
-            (skip-syntax-backward "-")
-            (point)))
+              (save-excursion
+                (forward-line -1)
+                (end-of-line)
+                (skip-syntax-backward "-")
+                (point)))
         (cond
-          ((< above-new-end-ws prev)
-            (setq prev above-new-end-ws)
-            (setq end-ws above-new-end-ws)
-            (let ((end-ws-before (char-before end-ws)))
-              (cond
-                ((and end-ws-before (char-equal end-ws-before line-terminate-char))
-                  (forward-line -1))
-                (t
-                  (setq iterate nil)))))
-          (t
-            (setq iterate nil))))
+         ((< above-new-end-ws prev)
+          (setq prev above-new-end-ws)
+          (setq end-ws above-new-end-ws)
+          (let ((end-ws-before (char-before end-ws)))
+            (cond
+             ((and end-ws-before (char-equal end-ws-before line-terminate-char))
+              (forward-line -1))
+             (t
+              (setq iterate nil)))))
+         (t
+          (setq iterate nil))))
       (run-stuff--extract-split-lines line-terminate-char))))
 
 
@@ -207,11 +198,11 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   "Wrapper for `run-stuff--extract-split-lines-search-up' that joins the string.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((line-terminate-str (char-to-string line-terminate-char)))
-    (mapconcat
-      (function
-        (lambda (s) (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
-      (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n")
-      " ")))
+    (mapconcat (function
+                (lambda (s)
+                  (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
+               (split-string (run-stuff--extract-split-lines-search-up line-terminate-char) "\n")
+               " ")))
 
 
 ;; ---------------------------------------------------------------------------
@@ -221,17 +212,14 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defmacro run-stuff-with-buffer-default-directory (&rest body)
   "Use the buffer directory as the default directory, executing BODY."
   (declare (indent 0))
-  `
-  (let
-    (
-      (default-directory
-        (let ((filename (buffer-file-name)))
-          (cond
-            (filename
+  `(let ((default-directory
+          (let ((filename (buffer-file-name)))
+            (cond
+             (filename
               (file-name-directory filename))
-            (t
+             (t
               default-directory)))))
-    ,@body))
+     ,@body))
 
 
 ;; ---------------------------------------------------------------------------
@@ -240,13 +228,13 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defun run-stuff-extract-multi-line ()
   "Extract lines from the current buffer, optionally multiple wrapped lines."
   (cond
-    ((use-region-p)
-      ;; Current selection.
-      (buffer-substring (region-beginning) (region-end)))
-    (t
-      ;; (thing-at-point 'line t) ;; current line
-      ;; a version that can extract multiple lines!
-      (run-stuff--extract-split-lines-search-up-joined ?\\))))
+   ((use-region-p)
+    ;; Current selection.
+    (buffer-substring (region-beginning) (region-end)))
+   (t
+    ;; (thing-at-point 'line t) ;; current line
+    ;; a version that can extract multiple lines!
+    (run-stuff--extract-split-lines-search-up-joined ?\\))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -256,10 +244,10 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
   (save-match-data
     (cond
-      ((string-match prefix-regex command)
-        (substring command (match-end 0)))
-      (t
-        nil))))
+     ((string-match prefix-regex command)
+      (substring command (match-end 0)))
+     (t
+      nil))))
 
 (defun run-stuff-test-prefix-match (command prefix-regex)
   "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
@@ -318,9 +306,9 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   "Run selected text in a terminal or use the current line."
   (interactive)
   (let
-    ( ;; Store function results.
-      (extract-fn-cache (list))
-      (handlers run-stuff-handlers))
+      ( ;; Store function results.
+       (extract-fn-cache (list))
+       (handlers run-stuff-handlers))
     (while handlers
       (pcase-let ((`(,extract-fn ,handle-fn) (pop handlers)))
         (let ((command (alist-get extract-fn extract-fn-cache)))
