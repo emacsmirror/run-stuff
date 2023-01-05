@@ -50,6 +50,10 @@
 ;; ---------------------------------------------------------------------------
 ;; Custom Variables
 
+(eval-when-compile
+  ;; For `string-remove-suffix'.
+  (require 'subr-x))
+
 (defgroup run-stuff nil
   "Context based command execution."
   :group 'tools)
@@ -73,38 +77,37 @@
   (list
    (list ;; Open the file in Emacs: "@ " prefix.
     'run-stuff-extract-multi-line
-    #'(lambda (command)
-        (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
-          (when command-test
-            (run-stuff-handle-file-open-in-buffer command-test)))))
+    (lambda (command)
+      (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
+        (when command-test
+          (run-stuff-handle-file-open-in-buffer command-test)))))
    (list ;; Open the file with the default mime type: "~ " prefix.
     'run-stuff-extract-multi-line
-    #'(lambda (command)
-        (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
-          (when command-test
-            (run-stuff-handle-file-default-mime command-test)))))
+    (lambda (command)
+      (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
+        (when command-test
+          (run-stuff-handle-file-default-mime command-test)))))
 
    (list ;; Open in a shell: "$ " prefix.
     'run-stuff-extract-multi-line
-    #'(lambda (command)
-        (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
-          (when command-test
-            (run-stuff-handle-shell command-test)))))
+    (lambda (command)
+      (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
+        (when command-test
+          (run-stuff-handle-shell command-test)))))
    (list ;; Open the URL (web browser).
     'run-stuff-extract-multi-line
-    #'(lambda (command)
-        (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
-          (when command-test
-            (run-stuff-handle-url command-test)))))
+    (lambda (command)
+      (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
+        (when command-test
+          (run-stuff-handle-url command-test)))))
    (list ;; Open the terminal at a directory.
     'run-stuff-extract-multi-line
-    #'(lambda (command)
-        (let ((command-test (and (file-directory-p command) command)))
-          (when command-test
-            (run-stuff-handle-directory-in-terminal command-test)))))
+    (lambda (command)
+      (let ((command-test (and (file-directory-p command) command)))
+        (when command-test
+          (run-stuff-handle-directory-in-terminal command-test)))))
    (list ;; Run the command without any further checks (fall-back).
-    'run-stuff-extract-multi-line
-    #'(lambda (command) (run-stuff-handle-shell-no-terminal command))))
+    'run-stuff-extract-multi-line (lambda (command) (run-stuff-handle-shell-no-terminal command))))
 
   "A list of lists, each defining a handler.
 
