@@ -75,38 +75,38 @@
 
 (defcustom run-stuff-handlers
   (list
-   (list ;; Open the file in Emacs: "@ " prefix.
+   (list ; Open the file in Emacs: "@ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-file-open-in-buffer command-test)))))
-   (list ;; Open the file with the default mime type: "~ " prefix.
+   (list ; Open the file with the default mime type: "~ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-file-default-mime command-test)))))
 
-   (list ;; Open in a shell: "$ " prefix.
+   (list ; Open in a shell: "$ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-shell command-test)))))
-   (list ;; Open the URL (web browser).
+   (list ; Open the URL (web browser).
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
         (when command-test
           (run-stuff-handle-url command-test)))))
-   (list ;; Open the terminal at a directory.
+   (list ; Open the terminal at a directory.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (and (file-directory-p command) command)))
         (when command-test
           (run-stuff-handle-directory-in-terminal command-test)))))
-   (list ;; Run the command without any further checks (fall-back).
+   (list ; Run the command without any further checks (fall-back).
     'run-stuff-extract-multi-line (lambda (command) (run-stuff-handle-shell-no-terminal command))))
 
   "A list of lists, each defining a handler.
@@ -235,7 +235,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
     ;; Current selection.
     (buffer-substring (region-beginning) (region-end)))
    (t
-    ;; (thing-at-point 'line t) ;; current line
+    ;; (thing-at-point 'line t) ; current line.
     ;; a version that can extract multiple lines!
     (run-stuff--extract-split-lines-search-up-joined ?\\))))
 
@@ -308,10 +308,9 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defun run-stuff-command-on-region-or-line ()
   "Run selected text in a terminal or use the current line."
   (interactive)
-  (let
-      ( ;; Store function results.
-       (extract-fn-cache (list))
-       (handlers run-stuff-handlers))
+  ;; Store function results in `extract-fn-cache'.
+  (let ((extract-fn-cache (list))
+        (handlers run-stuff-handlers))
     (while handlers
       (pcase-let ((`(,extract-fn ,handle-fn) (pop handlers)))
         (let ((command (alist-get extract-fn extract-fn-cache)))
