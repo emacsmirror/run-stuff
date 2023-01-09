@@ -323,4 +323,8 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
             (setq handlers nil)))))))
 
 (provide 'run-stuff)
+;; Local Variables:
+;; fill-column: 99
+;; indent-tabs-mode: nil
+;; End:
 ;;; run-stuff.el ends here
