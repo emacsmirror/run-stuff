@@ -147,7 +147,7 @@ Returns the line(s) as a string with no properties."
         ;; could be more efficient?
         (setq new-end-ws
               (save-excursion
-                (end-of-line)
+                (goto-char (pos-eol))
                 (skip-syntax-backward "-")
                 (point)))
         (cond
@@ -179,7 +179,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
         (setq above-new-end-ws
               (save-excursion
                 (forward-line -1)
-                (end-of-line)
+                (goto-char (pos-eol))
                 (skip-syntax-backward "-")
                 (point)))
         (cond
