@@ -137,7 +137,7 @@ The handlers are handled in order, first to last.
 On success, no other handlers are tested.
 
 This can be made a buffer local variable to customize this for each mode."
-  :type 'list)
+  :type '(repeat function))
 
 
 ;; ---------------------------------------------------------------------------
