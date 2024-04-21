@@ -130,6 +130,7 @@ This can be made a buffer local variable to customize this for each mode."
 
 (defun run-stuff--pos-eol-non-ws ()
   "Return the last non-white-space character of line."
+  (declare (important-return-value t))
   (save-excursion
     (goto-char (pos-eol))
     (skip-chars-backward "[:blank:]")
@@ -137,6 +138,7 @@ This can be made a buffer local variable to customize this for each mode."
 
 (defun run-stuff--pos-eol-non-ws-prev-line ()
   "Return the last non-white-space character of previous line."
+  (declare (important-return-value t))
   (save-excursion
     (forward-line -1)
     (goto-char (pos-eol))
@@ -148,6 +150,7 @@ This can be made a buffer local variable to customize this for each mode."
 Multiple lines (below the current) are extracted
 if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
+  (declare (important-return-value t))
   (interactive)
   (save-excursion
     (let ((start (pos-bol))
@@ -178,6 +181,7 @@ Returns the line(s) as a string with no properties."
 (defun run-stuff--extract-split-lines-search-up (line-terminate-char)
   "Wrapper for `run-stuff--extract-split-lines' that detects previous lines.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
+  (declare (important-return-value t))
   (interactive)
   (save-excursion
     (let ((prev (pos-bol))
@@ -205,6 +209,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defun run-stuff--extract-split-lines-search-up-joined (line-terminate-char)
   "Wrapper for `run-stuff--extract-split-lines-search-up' that joins the string.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
+  (declare (important-return-value t))
   (let ((line-terminate-str (char-to-string line-terminate-char)))
     (mapconcat (function
                 (lambda (s)
@@ -238,6 +243,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-extract-multi-line ()
   "Extract lines from the current buffer, optionally multiple wrapped lines."
+  (declare (important-return-value t))
   (cond
    ((use-region-p)
     ;; Current selection.
@@ -253,6 +259,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-test-prefix-strip (command prefix-regex)
   "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
+  (declare (important-return-value t))
   (save-match-data
     (cond
      ((string-match prefix-regex command)
@@ -262,6 +269,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-test-prefix-match (command prefix-regex)
   "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
+  (declare (important-return-value t))
   (save-match-data
     (when (string-match prefix-regex command)
       (match-string-no-properties 0 command))))
@@ -272,23 +280,27 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-handle-file-open-in-buffer (command)
   "Open COMMAND as a buffer."
+  (declare (important-return-value t))
   (run-stuff-with-buffer-default-directory
     (switch-to-buffer (find-file-noselect (expand-file-name command)))
     t))
 
 (defun run-stuff-handle-file-default-mime (command)
   "Open COMMAND using the default mime handler."
+  (declare (important-return-value t))
   (run-stuff-with-buffer-default-directory
     (call-process run-stuff-open-command nil 0 nil command)))
 
 (defun run-stuff-handle-shell (command)
   "Open COMMAND in a terminal."
+  (declare (important-return-value t))
   (run-stuff-with-buffer-default-directory
     (call-process run-stuff-terminal-command nil 0 nil run-stuff-terminal-execute-arg command)
     t))
 
 (defun run-stuff-handle-url (command)
   "Open COMMAND as a URL."
+  (declare (important-return-value t))
   ;; Would use 'browse-url', but emacs doesn't disown the process.
   (run-stuff-with-buffer-default-directory
     (call-process run-stuff-open-command nil 0 nil command)
@@ -296,6 +308,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-handle-directory-in-terminal (command)
   "Open COMMAND as a directory in a terminal."
+  (declare (important-return-value t))
   ;; Expand since it may be relative to the current file.
   (let ((default-directory (expand-file-name command)))
     (call-process run-stuff-terminal-command nil 0 nil)
@@ -303,6 +316,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 
 (defun run-stuff-handle-shell-no-terminal (command)
   "Open COMMAND without a terminal (fall-back when a prefix match isn't found)."
+  (declare (important-return-value t))
   ;; Expand since it may be relative to the current file.
   (run-stuff-with-buffer-default-directory
     (call-process-shell-command command nil 0 nil)
@@ -315,6 +329,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 ;;;###autoload
 (defun run-stuff-command-on-region-or-line ()
   "Run selected text in a terminal or use the current line."
+  (declare (important-return-value nil))
   (interactive)
   ;; Store function results in `extract-fn-cache'.
   (let ((extract-fn-cache (list))
