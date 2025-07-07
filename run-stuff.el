@@ -220,6 +220,17 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
                                "\n"))
                " ")))
 
+(defun run-stuff--with-buffer-default-directory-impl (body-fn)
+  "Use the buffer directory as the default directory, executing BODY-FN."
+  (let ((default-directory
+         (let ((filename (buffer-file-name)))
+           (cond
+            (filename
+             (file-name-directory filename))
+            (t
+             default-directory)))))
+    (funcall body-fn)))
+
 
 ;; ---------------------------------------------------------------------------
 ;; Public Utilities
@@ -228,14 +239,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defmacro run-stuff-with-buffer-default-directory (&rest body)
   "Use the buffer directory as the default directory, executing BODY."
   (declare (indent 0))
-  `(let ((default-directory
-          (let ((filename (buffer-file-name)))
-            (cond
-             (filename
-              (file-name-directory filename))
-             (t
-              default-directory)))))
-     ,@body))
+  `(run-stuff--with-buffer-default-directory-impl (lambda () ,@body)))
 
 
 ;; ---------------------------------------------------------------------------
