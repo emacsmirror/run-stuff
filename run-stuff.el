@@ -61,17 +61,14 @@
 
 (defcustom run-stuff-open-command "xdg-open"
   "Used to run open files with their default mime type."
-  :safe #'stringp
   :type 'string)
 
 (defcustom run-stuff-terminal-command "xterm"
   "Used to run commands in a terminal, the following text is to be executed."
-  :safe #'stringp
   :type 'string)
 
 (defcustom run-stuff-terminal-execute-arg "-e"
   "Passed to the terminal to execute a command."
-  :safe #'stringp
   :type 'string)
 
 (defcustom run-stuff-handlers
