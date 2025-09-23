@@ -98,7 +98,7 @@
    (cons ; Open the URL (web browser).
     'run-stuff-extract-multi-line
     (lambda (command)
-      (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
+      (let ((command-test (run-stuff-test-prefix-match command "^https?://[^[:blank:]\n]+")))
         (when command-test
           (run-stuff-handle-url command-test)))))
    (cons ; Open the terminal at a directory.
