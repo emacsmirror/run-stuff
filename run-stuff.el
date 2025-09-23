@@ -76,41 +76,41 @@
 
 (defcustom run-stuff-handlers
   (list
-   (list ; Open the file in Emacs: "@ " prefix.
+   (cons ; Open the file in Emacs: "@ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^@[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-file-open-in-buffer command-test)))))
-   (list ; Open the file with the default mime type: "~ " prefix.
+   (cons ; Open the file with the default mime type: "~ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^~[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-file-default-mime command-test)))))
 
-   (list ; Open in a shell: "$ " prefix.
+   (cons ; Open in a shell: "$ " prefix.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-strip command "^\\$[[:blank:]]+")))
         (when command-test
           (run-stuff-handle-shell command-test)))))
-   (list ; Open the URL (web browser).
+   (cons ; Open the URL (web browser).
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (run-stuff-test-prefix-match command "^http[s]*://[^[:blank:]\n]+")))
         (when command-test
           (run-stuff-handle-url command-test)))))
-   (list ; Open the terminal at a directory.
+   (cons ; Open the terminal at a directory.
     'run-stuff-extract-multi-line
     (lambda (command)
       (let ((command-test (and (file-directory-p command) command)))
         (when command-test
           (run-stuff-handle-directory-in-terminal command-test)))))
-   (list ; Run the command without any further checks (fall-back).
+   (cons ; Run the command without any further checks (fall-back).
     'run-stuff-extract-multi-line (lambda (command) (run-stuff-handle-shell-no-terminal command))))
 
-  "A list of lists, each defining a handler.
+  "A list of cons cells, each defining a handler.
 
 First (extract function)
   Return a string from the current context (typically the current line).
@@ -122,7 +122,7 @@ The handlers are handled in order, first to last.
 On success, no other handlers are tested.
 
 This can be made a buffer local variable to customize this for each mode."
-  :type '(repeat function))
+  :type '(repeat (cons function function)))
 
 
 ;; ---------------------------------------------------------------------------
@@ -339,7 +339,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (let ((extract-fn-cache (list))
         (handlers run-stuff-handlers))
     (while handlers
-      (pcase-let ((`(,extract-fn ,handle-fn) (pop handlers)))
+      (pcase-let ((`(,extract-fn . ,handle-fn) (pop handlers)))
         (let ((command (alist-get extract-fn extract-fn-cache)))
           (unless command
             (setq command (funcall extract-fn))
