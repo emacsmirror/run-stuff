@@ -148,7 +148,6 @@ Multiple lines (below the current) are extracted
 if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (declare (important-return-value t))
-  (interactive)
   (save-excursion
     (let ((start (pos-bol))
           (iterate t)
@@ -179,7 +178,6 @@ Returns the line(s) as a string with no properties."
   "Wrapper for `run-stuff--extract-split-lines' that detects previous lines.
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (declare (important-return-value t))
-  (interactive)
   (save-excursion
     (let ((prev (pos-bol))
           (iterate t)
