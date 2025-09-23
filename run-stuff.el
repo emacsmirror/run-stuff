@@ -290,7 +290,8 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   "Open COMMAND using the default mime handler."
   (declare (important-return-value t))
   (run-stuff-with-buffer-default-directory
-    (call-process run-stuff-open-command nil 0 nil command)))
+    (call-process run-stuff-open-command nil 0 nil command)
+    t))
 
 (defun run-stuff-handle-shell (command)
   "Open COMMAND in a terminal."
