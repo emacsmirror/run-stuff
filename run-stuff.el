@@ -7,7 +7,7 @@
 
 ;; URL: https://codeberg.org/ideasman42/emacs-run-stuff
 ;; Version: 0.0.3
-;; Keywords: files lisp files convenience hypermedia
+;; Keywords: files lisp convenience hypermedia
 ;; Package-Requires: ((emacs "29.1"))
 
 ;;; Commentary:
@@ -26,7 +26,7 @@
 ;; - '@ ' Open in an Emacs buffer.
 ;; - '~ ' Open with default mime type (works for paths too).
 ;; - 'http://' or 'https://' opens in a web-browser.
-;; - Open in terminal if its a directory.
+;; - Open in terminal if it's a directory.
 ;; - Default to running the command without a terminal
 ;;   when none of the conditions above succeed.
 ;;
@@ -35,7 +35,7 @@
 ;; This is done using the '\' character, when executing the current line
 ;; all surrounding lines which end with '\' will be included.
 ;;
-;; So you can for define a shell command as follows:
+;; So you can define a shell command as follows:
 ;;
 ;; $ make \
 ;;   -C /my/project \
@@ -149,14 +149,13 @@ if they end with LINE-TERMINATE-CHAR.
 Returns the line(s) as a string with no properties."
   (declare (important-return-value t))
   (save-excursion
-    (let ((start (pos-bol))
-          (iterate t)
-          ;; Use later.
-          (end nil)
-          (new-end nil)
-          (new-end-ws nil)
-          (end-ws nil))
-      (setq end start)
+    (let* ((start (pos-bol))
+           (end start)
+           (iterate t)
+           ;; Use later.
+           (new-end nil)
+           (new-end-ws nil)
+           (end-ws nil))
       (while iterate
         (setq new-end (pos-eol))
         (setq new-end-ws (run-stuff--pos-eol-non-ws))
@@ -206,9 +205,8 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (declare (important-return-value t))
   (let ((line-terminate-str (char-to-string line-terminate-char)))
-    (mapconcat (function
-                (lambda (s)
-                  (string-trim-right (string-remove-suffix line-terminate-str (string-trim s)))))
+    (mapconcat (lambda (s)
+                 (string-trim-right (string-remove-suffix line-terminate-str (string-trim s))))
                ;; Split string modifies match data.
                (save-match-data
                  (split-string (run-stuff--extract-split-lines-search-up line-terminate-char)
@@ -246,7 +244,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
   (cond
    ((use-region-p)
     ;; Current selection.
-    (buffer-substring (region-beginning) (region-end)))
+    (buffer-substring-no-properties (region-beginning) (region-end)))
    (t
     ;; (thing-at-point 'line t) ; current line.
     ;; a version that can extract multiple lines!
@@ -267,7 +265,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
       nil))))
 
 (defun run-stuff-test-prefix-match (command prefix-regex)
-  "Strip PREFIX-REGEX from COMMAND if it exists, otherwise nil."
+  "Return the matched PREFIX-REGEX from COMMAND if it exists, otherwise nil."
   (declare (important-return-value t))
   (save-match-data
     (when (string-match prefix-regex command)
@@ -301,7 +299,7 @@ Argument LINE-TERMINATE-CHAR is used to wrap lines."
 (defun run-stuff-handle-url (command)
   "Open COMMAND as a URL."
   (declare (important-return-value t))
-  ;; Would use 'browse-url', but emacs doesn't disown the process.
+  ;; Would use `browse-url', but emacs doesn't disown the process.
   (run-stuff-with-buffer-default-directory
     (call-process run-stuff-open-command nil 0 nil command)
     t))
