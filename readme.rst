@@ -15,7 +15,7 @@ sometimes there are tasks you run every so often or paths you might want to go b
 
 This makes it possible to use a file *(org-mode or just a text file)*
 as a convenient ad-hoc reference for miscellaneous commands and files
-*(a step up from hoping that handy command remains in you're shells search history)*.
+*(a step up from hoping that handy command remains in your shell's search history)*.
 
 
 Usage
@@ -24,7 +24,7 @@ Usage
 This package provides ``run-stuff-command-on-region-or-line`` which can be called
 from a key binding to execute the current selection or line.
 
-Since this has the potential to do some damage, its suggested you use a shortcut you wont press by accident.
+Since this has the potential to do some damage, it's suggested you use a shortcut you won't press by accident.
 eg: ``Ctrl-Alt-Shift-Return``.
 
 Example use in ``init.el``::
